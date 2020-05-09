@@ -5,8 +5,6 @@ body {
 
 .top-banner {
     background-color: #042336;
-    margin: 0;
-    padding: 0px;
     width: 100%;
     box-sizing: 'border-box'
 }
@@ -15,8 +13,19 @@ body {
     color: #ededed;
     margin: 0px;
     padding-left: 20px;
-    margin-bottom:-10px;
-    margin-top:-10px
+    padding-right: 20px; 
+    display: inline-block
+}
+
+.tabs {
+    display: inline-block;
+}
+
+.tab {
+    padding-left: 20px;
+    padding-right: 20px;  
+    display: inline-block;
+    color: #ededed;
 }
 
 .about-content {

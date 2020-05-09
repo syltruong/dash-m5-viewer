@@ -11,11 +11,18 @@ app.layout = html.Div([
     html.Div(
         [
             html.Div(
-            [html.H2(children='Dash M5 Viewer')],
-                style={
-                    'display' : 'inline-block',
-                },
-                className='title'
+                [
+                    html.Div(html.H2(children='Dash M5 Viewer'), className='title'),
+                    html.Div(
+                        [
+                            dcc.Link('About the challenge ', href='/about', className="tab"),
+                            dcc.Link('Explore the data ', href='/explore', className="tab"),
+                            dcc.Link('Evaluate Forecasting Accuracy ', href='/accuracy', className="tab")
+                        ],
+                        className='tabs'
+                    )
+                ],
+                className='row'
             ),
         ],
         className='top-banner'
@@ -26,10 +33,12 @@ app.layout = html.Div([
 @app.callback(Output('page-content', 'children'),
             [Input('url', 'pathname')])
 def display_page(pathname):
-    if pathname == '/apps/app1':
-        return layout1
-    elif pathname == '/apps/app2':
-        return layout2
+    if pathname == '/about':
+        return 'about the challenge'
+    elif pathname == '/explore':
+        return 'explore the data'
+    elif pathname == '/accuracy':
+        return 'evaluate forecast accuracy'
     else:
         return '404'
 
