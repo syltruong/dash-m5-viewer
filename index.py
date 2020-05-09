@@ -8,6 +8,18 @@ import callbacks
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
+    html.Div(
+        [
+            html.Div(
+            [html.H2(children='Dash M5 Viewer')],
+                style={
+                    'display' : 'inline-block',
+                },
+                className='title'
+            ),
+        ],
+        className='top-banner'
+    ),
     html.Div(id='page-content')
 ])
 
