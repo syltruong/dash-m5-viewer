@@ -4,6 +4,7 @@ from dash.dependencies import Input, Output
 
 from app import app
 from layouts import layout1, layout2
+from layout import about
 import callbacks
 
 app.layout = html.Div([
@@ -34,7 +35,7 @@ app.layout = html.Div([
             [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/about':
-        return 'about the challenge'
+        return about.content()
     elif pathname == '/explore':
         return 'explore the data'
     elif pathname == '/accuracy':
