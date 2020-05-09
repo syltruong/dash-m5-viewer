@@ -1,0 +1,26 @@
+#
+# editor config files
+#
+.vscode/*
+
+#
+# MacOS
+#
+.DS_Store
+
+#
+# data
+#
+data/*.csv
+data/*.zip
+data/.*/*
+
+#
+# notebooks
+#
+*.ipynb
+
+#
+# cache
+#
+*.pyc
