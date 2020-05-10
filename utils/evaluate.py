@@ -230,7 +230,7 @@ class AccuracyEvaluator(object):
         sales_df: pd.DataFrame,
         sell_prices_df: pd.DataFrame, 
         calendar_df: pd.DataFrame, 
-        n_validation_days:int = N_VALIDATION_DAYS):
+        n_validation_days: int = N_VALIDATION_DAYS):
         """
         Initiate the AccuracyEvaluator with all provided data and validation number of days.
         Pre-computes
@@ -251,7 +251,9 @@ class AccuracyEvaluator(object):
         n_validation_days : int
             Number of validation days to remove from the end of the time series
         """
-            
+
+        self.sales_df = sales_df
+
         self.n_validation_days = n_validation_days
             
         self.n_agg_levels, self.ids, self.agg_level_ids, self.rollup_matrix = get_rollup_matrix(
@@ -414,4 +416,3 @@ class AccuracyEvaluator(object):
 
         return wrmsse, residuals_per_agg_level_id, results_per_agg_df 
         
-    
