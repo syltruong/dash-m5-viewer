@@ -5,7 +5,6 @@ from dash.dependencies import Input, Output
 from app import app
 from layouts import layout1, layout2
 from layout import about, explore, evaluate
-import callbacks
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -44,4 +43,4 @@ def display_page(pathname):
         return '404'
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
