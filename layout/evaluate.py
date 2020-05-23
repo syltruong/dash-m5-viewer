@@ -28,11 +28,13 @@ UPLOAD_BUTTON_TEXT = [
 def content() -> html.Div:
 
     ret = [
-        instructions(),
+        html.Div([
+            instructions(),
+            score_display_area(),
+        ]),
         file_upload_area(),
-        hidden_uploaded_data_area(), 
-        score_display_area(),
         upload_error_message(),
+        hidden_uploaded_data_area(), 
         report_display_area()
     ]
 
@@ -43,11 +45,11 @@ def instructions() -> html.Div:
     ret = html.Div(
         [
             html.H4('Instructions'),
-            "Visualize errors on the 'Accuracy' competition.",
-            "The validation period corresponds to the last 28 days of the training set.",
+            "Visualize errors on the 'Accuracy' competition. ",
+            "The validation period corresponds to the last 28 days of the training set. ",
             "To begin, upload your predictions over that horizon, in the format specified by the competition."  
         ],
-        className='instructions'
+        className='instructions-evaluate'
     )
 
     return ret
@@ -108,7 +110,7 @@ def score_display_area() -> html.Div:
             className='about-selected-number-div'
         )
         ],
-        className='score-div'
+        className='score-evaluate'
         )
 
     return ret
