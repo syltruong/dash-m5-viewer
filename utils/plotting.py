@@ -1,8 +1,10 @@
 from typing import List
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from utils.explore import SalesExplorer
 from utils.settings import (
@@ -14,6 +16,40 @@ from utils.settings import (
     SALES_USD_COL,
     COL_HEIGHT
 )
+
+def empty_figure(text='') -> go.Figure:
+    fig = go.Figure()
+    fig.update_layout(
+        {
+            "xaxis": {
+                "visible": False
+            },
+            "yaxis": {
+                "visible": False
+            },
+            "annotations": [
+                {
+                    "text": text,
+                    "xref": "paper",
+                    "yref": "paper",
+                    "showarrow": False,
+                    "font": {
+                        "size": 21
+                    }
+                }
+            ],
+        }
+    )
+
+    if len(text)==0:
+        fig.update_layout(
+            {
+                "paper_bgcolor" : 'rgba(0,0,0,0)',
+                "plot_bgcolor" : 'rgba(0,0,0,0)',
+            }
+        )
+        
+    return fig
 
 def plot_sunburst(
     df: pd.DataFrame,
@@ -164,6 +200,92 @@ def plot_evaluate_first_col(results_df: pd.DataFrame) -> List[go.Figure]:
     return fig1, fig2, fig3
 
 
+def plot_evaluate_second_col(
+    agg_level: str, 
+    results_df: str,
+    residuals: np.ndarray
+    ) -> List[go.Figure]:
 
+    color = AGGREGATION_LEVELS_COLOR_DISCRETE_MAP[agg_level]
 
-    
+    fig1 = {}
+    fig2 = {}
+
+    n_figures = 3
+    max_n_agg_level_id = 30 # hardcode
+
+    #
+    # fig1
+    #
+    fig1 = go.Figure(
+        data=[go.Histogram(x=residuals, marker=dict(color=color))],
+            
+    )
+
+    fig1.update_layout(
+        height=COL_HEIGHT / n_figures,
+        title=f"Residual distribution for all series in agg level `{agg_level}`",
+        xaxis_title="y_pred - y_true",
+    )
+
+    #
+    # fig2
+    #
+
+    if results_df[AGG_LEVEL_ID_COL].nunique()<=max_n_agg_level_id:
+        
+        tmp = results_df[[AGG_LEVEL_ID_COL, WRMSSE_COL, SALES_USD_COL]]\
+            .sort_values(SALES_USD_COL, ascending=False)
+
+        fig2 = make_subplots(
+            rows=2,
+            cols=1,
+            specs=[
+                [{'type':'xy'}],
+                [{'type':'xy'}]
+            ],
+            subplot_titles=[
+                "Sales USD",
+                "WRMSSE (ordered by sales USD)",
+            ]
+        )
+
+        fig2.add_trace(
+            go.Bar(
+                x=tmp[AGG_LEVEL_ID_COL],
+                y=tmp[SALES_USD_COL],
+                name="Sales USD"
+            ),
+            1,1
+        )
+
+        fig2.add_trace(
+            go.Bar(
+                x=tmp[AGG_LEVEL_ID_COL],
+                y=tmp[SALES_USD_COL],
+                name="WRMSSE"
+            ),
+            2,1
+        )
+
+        fig2.update_traces(
+            marker_color=color
+            )
+
+        fig2.update_layout(
+            {
+                "paper_bgcolor" : 'rgba(0,0,0,0)'
+            }
+        )
+
+    else:
+        fig2 = empty_figure("Too many series to be displayed")
+
+    fig2.update_layout(
+        height= 2*COL_HEIGHT / n_figures,
+        title=f"Error and Sales USD repartition in agg level"
+    )
+
+    return fig1, fig2
+
+        

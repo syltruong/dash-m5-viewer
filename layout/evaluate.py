@@ -2,15 +2,18 @@ import datetime
 import json
 from typing import List
 
+import dash
 from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
+import numpy as np
 import pandas as pd
 
 from app import app, accuracy_evaluator
 from utils.plotting import (
-    plot_evaluate_first_col
+    plot_evaluate_first_col,
+    plot_evaluate_second_col
 )
 from utils.io import parse_contents
 
@@ -153,11 +156,11 @@ def report_display_area() -> html.Div:
     second_column = html.Div(
         children=[
             dcc.Graph(
-                id="eval_residuals_agg_level",
+                id="evaluate:residuals",
                 figure={} #empty_figure()
             ),
             dcc.Graph(
-                id="eval_pies_agg_level", # to change
+                id="evaluate:bars_agg_level", # to change
                 figure={} #empty_figure()
             ),
         ],
@@ -209,7 +212,6 @@ def receive_prediction_file(content, filename, last_modified):
             df = parse_contents(content)
         except Exception as e:
             return empty_response
-
         upload_button_children = UPLOAD_BUTTON_TEXT + [
             f' - Uploaded {filename} (last modified: {datetime.datetime.fromtimestamp(last_modified)})'
             ]
@@ -219,6 +221,7 @@ def receive_prediction_file(content, filename, last_modified):
         return upload_button_children, data, {'display' : 'block'}
     
     return empty_response
+
 
 @app.callback([
         Output('evaluate:score', 'children'),
@@ -245,6 +248,7 @@ def eval_predictions(data):
     
     return 'N/A', [], [], {'display' : 'none'}
 
+
 @app.callback([
         Output('evaluate:wrmsse_pie', 'figure'),
         Output('evaluate:rmsse_bar', 'figure'),
@@ -261,3 +265,66 @@ def render_fa_first_col(data):
         return plot_evaluate_first_col(results_df)
     
     return {}, {}, {}
+
+
+@app.callback([
+        Output('evaluate:selected_agg_level', 'children')
+    ],
+    [
+        Input('evaluate:wrmsse_pie', 'clickData'),
+        Input('evaluate:rmsse_bar', 'clickData'),
+        Input('evaluate:sales_per_agg_bar', 'clickData'),
+    ]
+)
+def relayout_clicked_agg_level(clickData1, clickData2, clickData3):
+    ctx = dash.callback_context
+
+    if not ctx.triggered:
+        return (None,)
+
+    agg_level = ctx.triggered[0]['value']['points'][0]['label']
+    
+    return (agg_level,)
+
+
+@app.callback([
+        Output('evaluate:residuals', 'figure'),
+        Output('evaluate:bars_agg_level', 'figure'),
+        Output('evaluate:report_second_col', 'style'),
+    ],
+    [
+        Input('evaluate:selected_agg_level', 'children'),
+    ],
+    [
+        State('evaluate:results', 'data'),
+        State('evaluate:residuals', 'children')
+    ]
+)
+def render_fa_second_col(agg_level, results_data, residuals_json):
+    if (agg_level is not None and len(agg_level) > 0):
+
+        #
+        # 1. get objects
+        #
+
+        results_df = pd.DataFrame.from_records(results_data)
+        
+        residuals_nd = np.array(
+            json.loads(residuals_json)
+            )
+
+        #
+        # 2. filter
+        #
+
+        results_df = results_df.loc[results_df["agg_level"]==agg_level]
+
+        agg_level_ids = accuracy_evaluator.agg_level_ids
+        index = agg_level_ids.loc[agg_level_ids["agg_level"]==agg_level]\
+            .reset_index()['index'].values
+
+        residuals = residuals_nd[index, :].reshape(-1) # filtered residuals
+
+        return plot_evaluate_second_col(agg_level, results_df, residuals) + ({'display': 'block'}, )
+    
+    return {}, {}, {'display': 'none'}
