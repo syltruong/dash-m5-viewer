@@ -120,9 +120,10 @@ def upload_error_message() -> html.Div:
     ret = html.Div(
         "There was an issue processing your file. Check the format and schema.",
         style={
-            'display' : 'hidden'
+            'display' : 'hidden',
         },
-        id='explore:upload_error_message'
+        id='evaluate:upload_error_message',
+        className='upload-error-div'
     )
 
     return ret
@@ -216,6 +217,7 @@ def receive_prediction_file(content, filename, last_modified):
             df = parse_contents(content)
         except Exception as e:
             return empty_response
+        
         upload_button_children = UPLOAD_BUTTON_TEXT + [
             f' - Uploaded {filename} (last modified: {datetime.datetime.fromtimestamp(last_modified)})'
             ]
@@ -231,7 +233,7 @@ def receive_prediction_file(content, filename, last_modified):
         Output('evaluate:score', 'children'),
         Output('evaluate:results', 'data'),
         Output('evaluate:residuals', 'children'),
-        Output('explore:upload_error_message', 'style')
+        Output('evaluate:upload_error_message', 'style')
     ],
     [
         Input('evaluate:predictions', 'data')

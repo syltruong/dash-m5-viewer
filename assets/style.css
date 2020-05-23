@@ -138,3 +138,9 @@ body {
     height: 150px;
     vertical-align: top;
 }
+
+.upload-error-div {
+    width: 100%;
+    text-align: center;
+    font-size: large;
+}
