@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output
 
 from app import app
 from layouts import layout1, layout2
-from layout import about, explore
+from layout import about, explore, evaluate
 import callbacks
 
 app.layout = html.Div([
@@ -39,7 +39,7 @@ def display_page(pathname):
     elif pathname == '/explore':
         return explore.content()
     elif pathname == '/accuracy':
-        return 'evaluate forecast accuracy'
+        return evaluate.content()
     else:
         return '404'
 

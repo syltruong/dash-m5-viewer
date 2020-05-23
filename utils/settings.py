@@ -36,6 +36,30 @@ AGGREGATION_LEVEL_NAMES = [
     ':'.join(agg_level) for agg_level in AGGREGATION_LEVELS
 ]
 
+# https://coolors.co/ff3f3f-ffd557-009fb7-cbf257-f49a50-99627c
+# https://coolors.co/8e1313-1dce84-1b772f-5542ac-298e6b-c60877
+COLORS = [
+    "#FF3F3F",
+    "#FFD557",
+    "#009FB7",
+    "#CBF257",
+    "#F49A50",
+    "#99627C",
+    "#8E1313",
+    "#1DCE84",
+    "#1B772F",
+    "#5542AC",
+    "#298E6B",
+    "#C60877"
+]
+
+AGGREGATION_LEVELS_COLOR_DISCRETE_MAP = dict(
+    zip(
+        AGGREGATION_LEVEL_NAMES,
+        COLORS
+    )
+)
+
 N_VALIDATION_DAYS = 28
 
 #
@@ -49,3 +73,12 @@ AGG_FUNCTIONS =[
     'min',
     'max',
 ]
+
+AGG_LEVEL_COL = 'agg_level'
+AGG_LEVEL_ID_COL = 'agg_level_id'
+
+WRMSSE_COL = 'wrmsse'
+RMSSE_COL = 'rmsse'
+SALES_USD_COL = 'sales_usd'
+
+COL_HEIGHT = 1500 # px

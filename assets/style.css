@@ -90,24 +90,6 @@ body {
 }
 
 
-
-.instructions-fa-div{
-    margin: 10px;
-    background-color: #f0ebde;
-    padding: 10px;
-    min-width: 550px;
-}
-
-.file-upload-button-fa-div{
-    
-    border-width: 1px;
-    border-style: dashed;
-    border-radius: 5px;
-    text-align: center;
-    padding: 20px;
-    margin: 10px;
-}
-
 .score-div {
     margin-left: 0px;
     margin-right: 2px;
@@ -120,4 +102,14 @@ body {
     display: inline-block;
     padding: 20px;
     margin-top: 10px;
+}
+
+.file-upload-button-div{
+    
+    border-width: 1px;
+    border-style: dashed;
+    border-radius: 5px;
+    text-align: center;
+    padding: 20px;
+    margin: 10px;
 }

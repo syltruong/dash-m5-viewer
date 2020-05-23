@@ -5,6 +5,15 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from utils.explore import SalesExplorer
+from utils.settings import (
+    AGGREGATION_LEVELS_COLOR_DISCRETE_MAP,
+    AGG_LEVEL_COL,
+    AGG_LEVEL_ID_COL,
+    WRMSSE_COL,
+    RMSSE_COL,
+    SALES_USD_COL,
+    COL_HEIGHT
+)
 
 def plot_sunburst(
     df: pd.DataFrame,
@@ -87,7 +96,72 @@ def plot_samples(
 
     return id_count, id_count_after_filtering, n_agg_time_series, fig
 
+def plot_evaluate_first_col(results_df: pd.DataFrame) -> List[go.Figure]:
+    """
+    Returns all plots for the first column of forecast accuracy tab
+    """
 
+    color_discrete_map = AGGREGATION_LEVELS_COLOR_DISCRETE_MAP 
+    
+    tmp = results_df.groupby([AGG_LEVEL_COL]).\
+        agg({WRMSSE_COL : 'sum', RMSSE_COL : 'mean', SALES_USD_COL : 'mean'}).\
+            reset_index().sort_values(WRMSSE_COL, ascending=False)
+    #
+    # WRMSSE pie chart
+    #
+    fig1 = px.pie(
+        tmp,
+        values=WRMSSE_COL,
+        names=AGG_LEVEL_COL,
+        color=AGG_LEVEL_COL,
+        color_discrete_map=color_discrete_map
+    )
+    fig1.update_layout(
+        {
+            "paper_bgcolor" : 'rgba(0,0,0,0)',
+            "plot_bgcolor" : 'rgba(0,0,0,0)',
+        }
+    )
+
+    #
+    # RMSSE bar chart
+    #
+    fig2 = px.bar(
+        tmp,
+        y=RMSSE_COL,
+        x=AGG_LEVEL_COL,
+        color=AGG_LEVEL_COL,
+        color_discrete_map=color_discrete_map
+    )
+
+    #
+    # Sales usd weight pie chart
+    #
+    fig3 = px.bar(
+        tmp,
+        y=SALES_USD_COL,
+        x=AGG_LEVEL_COL,
+        color=AGG_LEVEL_COL,
+        color_discrete_map=color_discrete_map,
+
+    )
+    fig3.update_layout(yaxis_type="log")
+
+    titles = [
+        "WRMSSE contribution of each aggregation level",
+        "Mean RMSSE of series in each aggregation level",
+        "Mean USD sales per series in each aggregation level (logy scale)"
+    ]
+        
+    n_figures = 3
+
+    for fig, title in zip([fig1, fig2, fig3], titles):
+        fig.update_layout(
+            height=COL_HEIGHT / n_figures,
+            title=title
+        )
+
+    return fig1, fig2, fig3
 
 
 
