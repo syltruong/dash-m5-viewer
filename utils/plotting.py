@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from utils.color import linear_gradient
 from utils.explore import SalesExplorer
 from utils.settings import (
     AGGREGATION_LEVELS_COLOR_DISCRETE_MAP,
@@ -288,4 +289,36 @@ def plot_evaluate_second_col(
 
     return fig1, fig2
 
+def plot_evaluate_third_col(
+    agg_level: str,
+    to_plot_df: pd.DataFrame
+    ) -> go.Figure:
         
+    color = AGGREGATION_LEVELS_COLOR_DISCRETE_MAP[agg_level]
+    colors = linear_gradient(color, n=4)['hex'][:2] 
+    color_discrete_map = dict(zip(['lookback', 'groundtruth', 'prediction'], colors + ['#636EFA'])) # hardcoded
+
+    fig = px.line(
+        to_plot_df,
+        x='d',
+        y='sales',
+        facet_row='agg_level_id',
+        color='label',
+        hover_data=['wrmsse', 'rmsse'],
+        hover_name='agg_level_id',
+        color_discrete_map=color_discrete_map
+    )
+    
+    n_facets = len(to_plot_df['agg_level_id'].unique())
+    max_col_height_per_plot = 300
+
+    col_height = min(COL_HEIGHT, max_col_height_per_plot * n_facets)
+
+    fig.update_layout(
+        height=col_height,
+        title=f"Series with highest WRMSSE"
+    )
+
+    fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[1]))
+
+    return fig

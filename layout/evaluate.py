@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 from typing import List
 
 import dash
@@ -13,7 +14,8 @@ import pandas as pd
 from app import app, accuracy_evaluator
 from utils.plotting import (
     plot_evaluate_first_col,
-    plot_evaluate_second_col
+    plot_evaluate_second_col,
+    plot_evaluate_third_col
 )
 from utils.io import parse_contents
 
@@ -170,7 +172,7 @@ def report_display_area() -> html.Div:
     third_column = html.Div(
         children=[
             dcc.Graph(
-                id="eval_sample_plots",
+                id="evaluate:sample_plots",
                 figure={} #empty_figure()
             )
         ],
@@ -328,3 +330,101 @@ def render_fa_second_col(agg_level, results_data, residuals_json):
         return plot_evaluate_second_col(agg_level, results_df, residuals) + ({'display': 'block'}, )
     
     return {}, {}, {'display': 'none'}
+
+
+@app.callback([
+        Output('evaluate:sample_plots', 'figure'),
+        Output('evaluate:report_third_col', 'style'),
+    ],
+    [
+        Input('evaluate:selected_agg_level', 'children'),
+    ],
+    [
+        State('evaluate:results', 'data'),
+        State('evaluate:predictions', 'data')
+    ]
+)
+def render_fa_third_col(agg_level, results_data, predictions_data):
+
+    if (agg_level is not None and len(agg_level) > 0):
+
+        #
+        # 1. get objects
+        #
+
+        results_df = pd.DataFrame.from_records(results_data)
+        
+        predictions_df = pd.DataFrame.from_records(predictions_data) 
+        groundtruth_df = accuracy_evaluator.groundtruth_df
+        lookback_df = accuracy_evaluator.lookback_df
+
+        predictions_values, groundtruth_values, lookback_values = [
+            accuracy_evaluator.get_rolled_up_values(df) 
+                for df in [predictions_df, groundtruth_df, lookback_df]
+                ]
+
+        #
+        # 2. filter
+        #
+
+        agg_level_ids_df = accuracy_evaluator.agg_level_ids
+
+        # to keep
+        results_df = results_df.loc[results_df["agg_level"]==agg_level].nlargest(n=10, columns=['wrmsse']).reset_index(drop=True)
+
+        agg_level_ids_to_plot = results_df['agg_level_id']        
+        index = agg_level_ids_df.loc[agg_level_ids_df["agg_level_id"].isin(agg_level_ids_to_plot)]\
+            .reset_index()['index'].values
+
+        # to keep
+        predictions_values, groundtruth_values, lookback_values = [
+            values[index, :] for values in [predictions_values, groundtruth_values, lookback_values]
+        ]
+
+        #
+        # 3. reshape and melt in one dataframe
+        #
+
+        d_cols_lookback = [col for col in lookback_df.columns if re.match(r'd_[0-9]+', col)]
+        d_cols_groundtruth = [col for col in groundtruth_df.columns if re.match(r'd_[0-9]+', col)]  
+        d_cols_predictions = d_cols_groundtruth
+        
+        dfs = []
+
+        for values, d_cols, label in zip(
+            [lookback_values, predictions_values, groundtruth_values],
+            [d_cols_lookback, d_cols_predictions, d_cols_groundtruth],
+            ['lookback', 'prediction', 'groundtruth'] # hardcoded
+        ):
+
+            df = pd.DataFrame(
+                values,
+                columns=d_cols
+            )
+
+            df['label'] = label
+
+            df = pd.concat(
+                [
+                    results_df,
+                    df
+                ],
+                axis=1,
+            )
+
+            df = pd.melt(
+                df,
+                id_vars=list(results_df.columns) + ['label'],
+                value_vars=d_cols,
+                var_name='d',
+                value_name='sales'
+            )
+
+            dfs.append(df)
+        
+        to_plot_df = pd.concat(dfs, axis=0, ignore_index=True)
+
+        fig = plot_evaluate_third_col(agg_level, to_plot_df)
+        return (fig, {'display': 'block'})
+    
+    return {}, {'display': 'none'}
