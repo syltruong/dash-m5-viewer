@@ -198,7 +198,6 @@ def report_display_area() -> html.Div:
 @app.callback([
         Output('evaluate:upload', 'children'),
         Output('evaluate:predictions', 'data'),
-        Output('evaluate:report', 'style'),
     ],
     [
         Input('evaluate:upload', 'contents')
@@ -209,7 +208,7 @@ def report_display_area() -> html.Div:
     ]
 )
 def receive_prediction_file(content, filename, last_modified):
-    empty_response = (UPLOAD_BUTTON_TEXT, [], {'display' : 'none'})
+    empty_response = (UPLOAD_BUTTON_TEXT, []) 
     
     if content is not None:
 
@@ -224,7 +223,7 @@ def receive_prediction_file(content, filename, last_modified):
 
         data = df.to_dict('records')
 
-        return upload_button_children, data, {'display' : 'block'}
+        return upload_button_children, data
     
     return empty_response
 
@@ -233,7 +232,8 @@ def receive_prediction_file(content, filename, last_modified):
         Output('evaluate:score', 'children'),
         Output('evaluate:results', 'data'),
         Output('evaluate:residuals', 'children'),
-        Output('evaluate:upload_error_message', 'style')
+        Output('evaluate:upload_error_message', 'style'),
+        Output('evaluate:report', 'style'),
     ],
     [
         Input('evaluate:predictions', 'data')
@@ -248,11 +248,11 @@ def eval_predictions(data):
                 predictions_df
             )
         except Exception:
-            return 'N/A', [], [], {'display' : 'block'}
+            return 'N/A', [], [], {'display' : 'block'}, {'display' : 'none'}
 
-        return wrmsse, results.to_dict('records'), json.dumps(residuals.tolist()), {'display' : 'none'}
+        return wrmsse, results.to_dict('records'), json.dumps(residuals.tolist()), {'display' : 'none'}, {'display' : 'block'}
     
-    return 'N/A', [], [], {'display' : 'none'}
+    return 'N/A', [], [], {'display' : 'none'}, {'display' : 'none'}
 
 
 @app.callback([
