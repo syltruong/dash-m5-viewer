@@ -18,8 +18,8 @@ This project uses `pipenv` for python dependency management.
 To install dependencies for this project, run:
 
 ```
-$ git clone https://github.com/syltruong/m5-viewer.git
-$ cd m5-viewer
+$ git clone https://github.com/syltruong/dash-m5-viewer.git
+$ cd dash-m5-viewer
 $ pipenv install
 ```
 

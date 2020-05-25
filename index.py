@@ -40,7 +40,12 @@ def display_page(pathname):
     elif pathname == '/accuracy':
         return evaluate.content()
     else:
-        return '404'
+        return html.Div(
+            html.H4("Start with visiting one the tabs in the above ^"),
+            style={
+                'padding':'10px'
+            }
+        )
 
 if __name__ == '__main__':
     app.run_server(debug=False)
